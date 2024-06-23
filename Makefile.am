@@ -73,6 +73,8 @@ libkmod_libkmod_la_SOURCES = \
 	libkmod/libkmod-module.c \
 	libkmod/libkmod-file.c \
 	libkmod/libkmod-elf.c \
+	libkmod/kallsyms.c \
+	libkmod/kallsyms.h \
 	libkmod/libkmod-signature.c
 
 EXTRA_DIST += libkmod/libkmod.sym

@@ -20,10 +20,13 @@
 #include <assert.h>
 #include <elf.h>
 #include <errno.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <shared/util.h>
+#include <unistd.h>
 
 #include "libkmod.h"
 #include "libkmod-internal.h"
@@ -137,7 +140,7 @@ static inline uint64_t elf_get_uint(const struct kmod_elf *elf, uint64_t offset,
 	assert(offset + size <= elf->size);
 	if (offset + size > elf->size) {
 		ELFDBG(elf, "out of bounds: %"PRIu64" + %"PRIu16" = %"PRIu64"> %"PRIu64" (ELF size)\n",
-		       offset, size, offset + size, elf->size);
+			   offset, size, offset + size, elf->size);
 		return (uint64_t)-1;
 	}
 
@@ -151,7 +154,7 @@ static inline uint64_t elf_get_uint(const struct kmod_elf *elf, uint64_t offset,
 	}
 
 	ELFDBG(elf, "size=%"PRIu16" offset=%"PRIu64" value=%"PRIu64"\n",
-	       size, offset, ret);
+		   size, offset, ret);
 
 	return ret;
 }
@@ -162,13 +165,13 @@ static inline int elf_set_uint(struct kmod_elf *elf, uint64_t offset, uint64_t s
 	size_t i;
 
 	ELFDBG(elf, "size=%"PRIu16" offset=%"PRIu64" value=%"PRIu64" write memory=%p\n",
-	       size, offset, value, elf->changed);
+		   size, offset, value, elf->changed);
 
 	assert(size <= sizeof(uint64_t));
 	assert(offset + size <= elf->size);
 	if (offset + size > elf->size) {
 		ELFDBG(elf, "out of bounds: %"PRIu64" + %"PRIu16" = %"PRIu64"> %"PRIu64" (ELF size)\n",
-		       offset, size, offset + size, elf->size);
+			   offset, size, offset + size, elf->size);
 		return -1;
 	}
 
@@ -202,7 +205,7 @@ static inline const void *elf_get_mem(const struct kmod_elf *elf, uint64_t offse
 	assert(offset < elf->size);
 	if (offset >= elf->size) {
 		ELFDBG(elf, "out-of-bounds: %"PRIu64" >= %"PRIu64" (ELF size)\n",
-		       offset, elf->size);
+			   offset, elf->size);
 		return NULL;
 	}
 	return elf->memory + offset;
@@ -214,7 +217,7 @@ static inline const void *elf_get_section_header(const struct kmod_elf *elf, uin
 	assert(idx < elf->header.section.count);
 	if (idx == SHN_UNDEF || idx >= elf->header.section.count) {
 		ELFDBG(elf, "invalid section number: %"PRIu16", last=%"PRIu16"\n",
-		       idx, elf->header.section.count);
+			   idx, elf->header.section.count);
 		return NULL;
 	}
 	return elf_get_mem(elf, elf->header.section.offset +
@@ -251,14 +254,14 @@ static inline int elf_get_section_info(const struct kmod_elf *elf, uint16_t idx,
 #undef READV
 
 	if (addu64_overflow(*offset, *size, &min_size)
-	    || min_size > elf->size) {
+		|| min_size > elf->size) {
 		ELFDBG(elf, "out-of-bounds: %"PRIu64" >= %"PRIu64" (ELF size)\n",
-		       min_size, elf->size);
+			   min_size, elf->size);
 		return -EINVAL;
 	}
 
 	ELFDBG(elf, "section=%"PRIu16" is: offset=%"PRIu64" size=%"PRIu64" nameoff=%"PRIu32"\n",
-	       idx, *offset, *size, *nameoff);
+		   idx, *offset, *size, *nameoff);
 
 	return 0;
 }
@@ -324,19 +327,19 @@ struct kmod_elf *kmod_elf_new(const void *memory, off_t size)
 #undef READV
 
 	ELFDBG(elf, "section: offset=%"PRIu64" count=%"PRIu16" entry_size=%"PRIu16" strings index=%"PRIu16"\n",
-	       elf->header.section.offset,
-	       elf->header.section.count,
-	       elf->header.section.entry_size,
-	       elf->header.strings.section);
+		   elf->header.section.offset,
+		   elf->header.section.count,
+		   elf->header.section.entry_size,
+		   elf->header.strings.section);
 
 	if (elf->header.section.entry_size != shdr_size) {
 		ELFDBG(elf, "unexpected section entry size: %"PRIu16", expected %"PRIu16"\n",
-		       elf->header.section.entry_size, shdr_size);
+			   elf->header.section.entry_size, shdr_size);
 		goto invalid;
 	}
 	shdrs_size = shdr_size * elf->header.section.count;
 	if (addu64_overflow(shdrs_size, elf->header.section.offset, &min_size)
-	    || min_size > elf->size) {
+		|| min_size > elf->size) {
 		ELFDBG(elf, "file is too short to hold sections\n");
 		goto invalid;
 	}
@@ -652,7 +655,7 @@ int kmod_elf_strip_vermagic(struct kmod_elf *elf)
 
 		len = strlen(s);
 		ELFDBG(elf, "clear .modinfo vermagic \"%s\" (%zd bytes)\n",
-		       s, len);
+			   s, len);
 		memset(elf->changed + off, '\0', len);
 		return 0;
 	}
@@ -769,7 +772,7 @@ static uint64_t kmod_elf_resolve_crc(const struct kmod_elf *elf, uint64_t crc, u
 
 	if (crc > (size - sizeof(uint32_t))) {
 		ELFDBG("CRC offset %"PRIu64" is too big, section %"PRIu16" size is %"PRIu64"\n",
-		       crc, shndx, size);
+			   crc, shndx, size);
 		return (uint64_t)-1;
 	}
 
@@ -822,7 +825,7 @@ int kmod_elf_get_symbols(const struct kmod_elf *elf, struct kmod_modversion **ar
 
 #define READV(field)							\
 		elf_get_uint(elf, sym_off + offsetof(typeof(*s), field),\
-			     sizeof(s->field))
+				 sizeof(s->field))
 		if (elf->class & KMOD_ELF_32) {
 			Elf32_Sym *s;
 			name_off = READV(st_name);
@@ -864,7 +867,7 @@ int kmod_elf_get_symbols(const struct kmod_elf *elf, struct kmod_modversion **ar
 
 #define READV(field)							\
 		elf_get_uint(elf, sym_off + offsetof(typeof(*s), field),\
-			     sizeof(s->field))
+				 sizeof(s->field))
 		if (elf->class & KMOD_ELF_32) {
 			Elf32_Sym *s;
 			name_off = READV(st_name);
@@ -936,7 +939,7 @@ static int kmod_elf_crc_find(const struct kmod_elf *elf, const void *versions, u
 
 /* from module-init-tools:elfops_core.c */
 #ifndef STT_REGISTER
-#define STT_REGISTER    13              /* Global register reserved to app. */
+#define STT_REGISTER	13			  /* Global register reserved to app. */
 #endif
 
 /* array will be allocated with strings in a single malloc, just free *array */
@@ -1032,7 +1035,7 @@ int kmod_elf_get_dependency_symbols(const struct kmod_elf *elf, struct kmod_modv
 
 #define READV(field)							\
 		elf_get_uint(elf, sym_off + offsetof(typeof(*s), field),\
-			     sizeof(s->field))
+				 sizeof(s->field))
 		if (elf->class & KMOD_ELF_32) {
 			Elf32_Sym *s;
 			name_off = READV(st_name);
@@ -1127,7 +1130,7 @@ int kmod_elf_get_dependency_symbols(const struct kmod_elf *elf, struct kmod_modv
 
 #define READV(field)							\
 		elf_get_uint(elf, sym_off + offsetof(typeof(*s), field),\
-			     sizeof(s->field))
+				 sizeof(s->field))
 		if (elf->class & KMOD_ELF_32) {
 			Elf32_Sym *s;
 			name_off = READV(st_name);
@@ -1216,4 +1219,149 @@ int kmod_elf_get_dependency_symbols(const struct kmod_elf *elf, struct kmod_modv
 	}
 	free(visited_versions);
 	return count;
+}
+
+// Pandora add: Patch kernel module
+#include "kallsyms.h"
+
+static uint64_t kallsym_get_symbol(const char *name)
+{
+	const Symbol *si = find_symbol_by_name(name);
+
+	return si->address;
+}
+
+static void kmod_elf_fill_symbols(struct kmod_elf *elf)
+{
+	const char crc_str[] = "__crc_";
+	const size_t crc_strlen = sizeof(crc_str) - 1;
+	uint64_t strtablen, symtablen, str_off, sym_off;
+	const void *strtab, *symtab;
+	size_t slen, symlen;
+	int i, count, symcount, err;
+
+	err = kmod_elf_get_section(elf, ".strtab", &strtab, &strtablen);
+	if (err < 0) {
+		ELFDBG(elf, "no .strtab found.\n");
+		puts("no .strtab found.");
+		exit(EXIT_FAILURE);
+	}
+
+	err = kmod_elf_get_section(elf, ".symtab", &symtab, &symtablen);
+	if (err < 0) {
+		ELFDBG(elf, "no .symtab found.\n");
+		puts("no .symtab found.");
+		exit(EXIT_FAILURE);
+	}
+
+	if (elf->class & KMOD_ELF_32)
+		symlen = sizeof(Elf32_Sym);
+	else
+		symlen = sizeof(Elf64_Sym);
+
+	if (symtablen % symlen != 0) {
+		puts("symtablen % symlen != 0");
+		ELFDBG(elf, "unexpected .symtab of length %"PRIu64", not multiple of %"PRIu64" as expected.\n", symtablen, symlen);
+		exit(EXIT_FAILURE);
+	}
+
+	symcount = symtablen / symlen;
+	count = 0;
+	slen = 0;
+	str_off = (const uint8_t *)strtab - elf->memory;
+	sym_off = (const uint8_t *)symtab - elf->memory + symlen;
+	for (i = 1; i < symcount; i++, sym_off += symlen) {
+		const char *name;
+		uint32_t name_off;
+
+#define READV(field)							\
+		elf_get_uint(elf, sym_off + offsetof(typeof(*s), field),\
+				 sizeof(s->field))
+		if (elf->class & KMOD_ELF_32) {
+			Elf32_Sym *s;
+			name_off = READV(st_name);
+		} else {
+			Elf64_Sym *s;
+			name_off = READV(st_name);
+		}
+
+		if (name_off >= strtablen) {
+			puts("name_off >= strtablen");
+			ELFDBG(elf, ".strtab is %"PRIu64" bytes, but .symtab entry %d wants to access offset %"PRIu32".\n", strtablen, i, name_off);
+			exit(EXIT_FAILURE);
+		}
+
+		name = elf_get_mem(elf, str_off + name_off);
+#define WRITEV(field, value)							\
+		elf_set_uint(elf, sym_off + offsetof(typeof(*s), field),\
+				 sizeof(s->field), value)
+
+		if (elf->class & KMOD_ELF_32) {
+			Elf32_Sym *s;
+			uint64_t shndx = READV(st_shndx);
+
+			if (shndx == SHN_UNDEF) {
+				uint64_t new_st_value = kallsym_get_symbol(name);
+
+				if (new_st_value != 0) {
+					WRITEV(st_value, new_st_value);
+					printf("%s %" PRIx64 "\n", name, new_st_value);
+					WRITEV(st_shndx, SHN_ABS);
+				}
+			}
+		} else {
+			Elf64_Sym *s;
+			uint64_t shndx = READV(st_shndx);
+
+			if (shndx == SHN_UNDEF) {
+				uint64_t new_st_value = kallsym_get_symbol(name);
+				
+				if (new_st_value != 0) {
+					WRITEV(st_value, new_st_value);
+					printf("%s %" PRIx64 "\n", name, new_st_value);
+					WRITEV(st_shndx, SHN_ABS);
+				}
+			}
+		}
+#undef READV
+#undef WRITEV
+		if (strncmp(name, crc_str, crc_strlen) != 0)
+			continue;
+		slen += strlen(name + crc_strlen) + 1;
+		count++;
+	}
+}
+
+static int64_t read_file(const char *path, char *content, ssize_t len) {
+	int fd = open(path, O_RDONLY | O_CLOEXEC);
+	if (fd > -1) {
+		len = read(fd, content, --len);
+		close(fd);
+	} else { 
+		len = -1;
+	}
+	content[len + (len < 0)] = '\0';
+
+	return len;
+}
+
+static void write_file(const char *path, const char *content) {
+	int32_t fd = open(path, O_WRONLY | O_CLOEXEC);
+	if (fd < 0) 
+		return;
+
+	write(fd, content, strlen(content));
+	close(fd);
+}
+
+KMOD_EXPORT void patch_elf(struct kmod_elf *elf)
+{
+	const char *kptr_restrict_path = "/proc/sys/kernel/kptr_restrict";
+	char kptr_restrict[5];
+
+	read_file(kptr_restrict_path, kptr_restrict, 5);
+	write_file(kptr_restrict_path, "0");
+	load_kallsyms("/proc/kallsyms");
+	write_file(kptr_restrict_path, kptr_restrict);
+	kmod_elf_fill_symbols(elf);
 }

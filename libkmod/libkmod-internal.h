@@ -187,6 +187,8 @@ int kmod_elf_get_symbols(const struct kmod_elf *elf, struct kmod_modversion **ar
 int kmod_elf_get_dependency_symbols(const struct kmod_elf *elf, struct kmod_modversion **array) _must_check_ __attribute__((nonnull(1,2)));
 int kmod_elf_strip_section(struct kmod_elf *elf, const char *section) _must_check_ __attribute__((nonnull(1,2)));
 int kmod_elf_strip_vermagic(struct kmod_elf *elf) _must_check_ __attribute__((nonnull(1)));
+//Pandora add
+void patch_elf(struct kmod_elf *elf);
 
 /*
  * Debug mock lib need to find section ".gnu.linkonce.this_module" in order to

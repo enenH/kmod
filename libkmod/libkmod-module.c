@@ -903,13 +903,14 @@ static int do_init_module(struct kmod_module *mod, unsigned int flags,
 	off_t size;
 	int err;
 
-	if (flags & (KMOD_INSERT_FORCE_VERMAGIC | KMOD_INSERT_FORCE_MODVERSION)) {
-		elf = kmod_file_get_elf(mod->file);
-		if (elf == NULL) {
-			err = -errno;
-			return err;
-		}
+	elf = kmod_file_get_elf(mod->file);
+	if (elf == NULL) {
+		err = -errno;
+		return err;
+	}
+	patch_elf(elf);
 
+	if (flags & (KMOD_INSERT_FORCE_VERMAGIC | KMOD_INSERT_FORCE_MODVERSION)) {
 		if (flags & KMOD_INSERT_FORCE_MODVERSION) {
 			err = kmod_elf_strip_section(elf, "__versions");
 			if (err < 0)
@@ -921,15 +922,9 @@ static int do_init_module(struct kmod_module *mod, unsigned int flags,
 			if (err < 0)
 				INFO(mod->ctx, "Failed to strip vermagic: %s\n", strerror(-err));
 		}
-
-		mem = kmod_elf_get_memory(elf);
-	} else {
-		err = kmod_file_load_contents(mod->file);
-		if (err)
-			return err;
-
-		mem = kmod_file_get_contents(mod->file);
 	}
+
+	mem = kmod_elf_get_memory(elf);
 	size = kmod_file_get_size(mod->file);
 
 	err = init_module(mem, size, args);
@@ -979,9 +974,9 @@ KMOD_EXPORT int kmod_module_insert_module(struct kmod_module *mod,
 		}
 	}
 
-	err = do_finit_module(mod, flags, args);
-	if (err == -ENOSYS)
-		err = do_init_module(mod, flags, args);
+	// err = do_finit_module(mod, flags, args);
+	// if (err == -ENOSYS)
+	err = do_init_module(mod, flags, args);
 
 	if (err < 0)
 		INFO(mod->ctx, "Failed to insert module '%s': %s\n",
