@@ -33,3 +33,5 @@
 .*.swp
 cscope.out
 tags
+compile_commands.json
+/.cache
