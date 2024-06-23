@@ -150,9 +150,9 @@ static void help(void)
 		"\t-v, --verbose               enables more messages\n"
 		"\t-V, --version               show version\n"
 		"\t-h, --help                  show this help\n",
-		program_invocation_short_name, program_invocation_short_name,
-		program_invocation_short_name, program_invocation_short_name,
-		program_invocation_short_name, program_invocation_short_name);
+		GET_PROGRAM_NAME(), GET_PROGRAM_NAME(),
+		GET_PROGRAM_NAME(), GET_PROGRAM_NAME(),
+		GET_PROGRAM_NAME(), GET_PROGRAM_NAME());
 }
 
 _printf_format_(1, 2)

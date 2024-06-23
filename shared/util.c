@@ -370,7 +370,7 @@ char *path_make_absolute_cwd(const char *p)
 	if (path_is_absolute(p))
 		return strdup(p);
 
-	cwd = get_current_dir_name();
+	cwd = getcwd(NULL, 0);
 	if (!cwd)
 		return NULL;
 

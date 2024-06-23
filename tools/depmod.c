@@ -111,7 +111,7 @@ static void help(void)
 		"\t                     current kernel symbols.\n"
 		"\t-E, --symvers=FILE   Use Module.symvers file to check\n"
 		"\t                     symbol versions.\n",
-		program_invocation_short_name);
+		GET_PROGRAM_NAME());
 }
 
 _printf_format_(1, 2)

@@ -142,7 +142,7 @@ static void help(void)
 	       "\t-h, --help           show this help\n"
 	       "\n"
 	       "Formats:\n",
-	 program_invocation_short_name);
+	 GET_PROGRAM_NAME());
 
 	for (i = 0; i < ARRAY_SIZE(static_nodes_formats); i++) {
 		if (static_nodes_formats[i]->description != NULL) {

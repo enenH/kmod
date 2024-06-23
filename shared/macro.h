@@ -74,3 +74,11 @@
 #define noreturn __attribute__((noreturn))
 #endif
 #endif
+
+#undef GET_PROGRAM_NAME
+#ifdef __GLIBC__
+#   define GET_PROGRAM_NAME() program_invocation_short_name
+#else /* *BSD and OS X */
+#   include <stdlib.h>
+#   define GET_PROGRAM_NAME() getprogname()
+#endif

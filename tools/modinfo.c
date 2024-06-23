@@ -370,7 +370,7 @@ static void help(void)
 		"\t-b, --basedir=DIR           Use DIR as filesystem root for " MODULE_DIRECTORY "\n"
 		"\t-V, --version               Show version\n"
 		"\t-h, --help                  Show this help\n",
-		program_invocation_short_name);
+		GET_PROGRAM_NAME());
 }
 
 static bool is_module_filename(const char *name)

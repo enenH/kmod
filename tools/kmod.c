@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 {
 	int err;
 
-	if (streq(program_invocation_short_name, "kmod"))
+	if (streq(GET_PROGRAM_NAME(), "kmod"))
 		err = handle_kmod_commands(argc, argv);
 	else
 		err = handle_kmod_compat_commands(argc, argv);

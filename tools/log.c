@@ -85,10 +85,10 @@ static void log_kmod(void *data, int priority, const char *file, int line,
 	} else {
 #ifdef ENABLE_DEBUG
 		fprintf(stderr, "%s: %s: %s:%d %s() %s",
-			program_invocation_short_name, prioname, file, line,
+			GET_PROGRAM_NAME(), prioname, file, line,
 			fn, str);
 #else
-		fprintf(stderr, "%s: %s: %s", program_invocation_short_name,
+		fprintf(stderr, "%s: %s: %s", GET_PROGRAM_NAME(),
 			prioname, str);
 #endif
 	}
@@ -101,7 +101,7 @@ void log_open(bool use_syslog)
 	log_use_syslog = use_syslog;
 
 	if (log_use_syslog)
-		openlog(program_invocation_short_name, LOG_CONS, LOG_DAEMON);
+		openlog(GET_PROGRAM_NAME(), LOG_CONS, LOG_DAEMON);
 }
 
 void log_close(void)
@@ -132,7 +132,7 @@ void log_printf(int prio, const char *fmt, ...)
 	if (log_use_syslog)
 		syslog(prio, "%s: %s", prioname, msg);
 	else
-		fprintf(stderr, "%s: %s: %s", program_invocation_short_name,
+		fprintf(stderr, "%s: %s: %s", GET_PROGRAM_NAME(),
 			prioname, msg);
 	free(msg);
 
