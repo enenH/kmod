@@ -1228,7 +1228,7 @@ static uint64_t kallsym_get_symbol(const char *name)
 {
 	const Symbol *si = find_symbol_by_name(name);
 
-	return si->address;
+	return si? si->address : 0;
 }
 
 static void kmod_elf_fill_symbols(struct kmod_elf *elf)
